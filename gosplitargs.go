@@ -7,7 +7,9 @@ import (
 )
 
 func SplitArgs(input, separator string) ([]string, error) {
-	//        separator = separator || /\s/g;
+	if separator == "" {
+		separator = "\\s"
+	}
 	singleQuoteOpen := false
 	doubleQuoteOpen := false
 	var tokenBuffer []string
@@ -15,7 +17,7 @@ func SplitArgs(input, separator string) ([]string, error) {
 
 	arr := strings.Split(input, "")
 	for _, element := range arr {
-		matches, err := regexp.MatchString(separator, input)
+		matches, err := regexp.MatchString(separator, element)
 		if err != nil {
 			return nil, err
 		}

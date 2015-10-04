@@ -7,14 +7,15 @@ import (
 )
 
 func TestSplitArgs(t *testing.T) {
-	test(t, "I said 'I am sorry.', and he said \"it doesn't matter.\"")
-	test(t, "I said \"I am sorry.\", and he said \"it doesn't matter.\"")
-	test(t, `I said "I am sorry.", and he said "it doesn't matter."`)
-	test(t, `I said 'I am sorry.', and he said "it doesn't matter."`)
+	testSpace(t, "I said 'I am sorry.', and he said \"it doesn't matter.\"")
+	testSpace(t, "I said \"I am sorry.\", and he said \"it doesn't matter.\"")
+	testSpace(t, `I said "I am sorry.", and he said "it doesn't matter."`)
+	testSpace(t, `I said 'I am sorry.', and he said "it doesn't matter."`)
+	testSemicolon(t, "SET @safe_uuid := UUID();INSERT INTO sys_user SET ID=@safe_uuid, CODE='1;2', EMAIL=?, PASSWORD=ENCRYPT(?, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16)));")
 }
 
-func test(t *testing.T, i string) {
-	o, err := SplitArgs(i, "")
+func testSpace(t *testing.T, i string) {
+	o, err := SplitArgs(i, "", false)
 	assert.Nil(t, err)
 	assert.Equal(t, len(o), 7)
 	assert.Equal(t, o[0], "I")
@@ -24,4 +25,11 @@ func test(t *testing.T, i string) {
 	assert.Equal(t, o[4], "he")
 	assert.Equal(t, o[5], "said")
 	assert.Equal(t, o[6], "it doesn't matter.")
+}
+
+func testSemicolon(t *testing.T, i string) {
+	o, err := SplitArgs(i, ";", true)
+	assert.Nil(t, err)
+	assert.Equal(t, o[0], "SET @safe_uuid := UUID()")
+	assert.Equal(t, o[1], "INSERT INTO sys_user SET ID=@safe_uuid, CODE='1;2', EMAIL=?, PASSWORD=ENCRYPT(?, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16)))")
 }

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func SplitArgs(input, separator string) ([]string, error) {
+func SplitArgs(input, separator string, keepQuotes bool) ([]string, error) {
 	if separator == "" {
 		separator = "\\s"
 	}
@@ -21,30 +21,26 @@ func SplitArgs(input, separator string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		if element == "'" {
-			if !doubleQuoteOpen {
-				singleQuoteOpen = !singleQuoteOpen
-				continue
-			}
-		} else if element == `"` {
-			if !singleQuoteOpen {
-				doubleQuoteOpen = !doubleQuoteOpen
-				continue
-			}
-		}
-
-		if !singleQuoteOpen && !doubleQuoteOpen {
-			if matches {
-				if len(tokenBuffer) > 0 {
-					ret = append(ret, strings.Join(tokenBuffer, ""))
-					tokenBuffer = make([]string, 0)
-				}
-			} else {
+		if element == "'" && !doubleQuoteOpen {
+			if keepQuotes {
 				tokenBuffer = append(tokenBuffer, element)
 			}
-		} else if singleQuoteOpen {
-			tokenBuffer = append(tokenBuffer, element)
-		} else if doubleQuoteOpen {
+			singleQuoteOpen = !singleQuoteOpen
+			continue
+		} else if element == `"` && !singleQuoteOpen {
+			if keepQuotes {
+				tokenBuffer = append(tokenBuffer, element)
+			}
+			doubleQuoteOpen = !doubleQuoteOpen
+			continue
+		}
+
+		if !singleQuoteOpen && !doubleQuoteOpen && matches {
+			if len(tokenBuffer) > 0 {
+				ret = append(ret, strings.Join(tokenBuffer, ""))
+				tokenBuffer = make([]string, 0)
+			}
+		} else {
 			tokenBuffer = append(tokenBuffer, element)
 		}
 	}

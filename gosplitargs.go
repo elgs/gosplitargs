@@ -53,3 +53,32 @@ func SplitArgs(input, separator string, keepQuotes bool) ([]string, error) {
 	}
 	return ret, nil
 }
+
+func CountSeparators(input, separator string) (int, error) {
+	if separator == "" {
+		separator = "\\s+"
+	}
+	singleQuoteOpen := false
+	doubleQuoteOpen := false
+	ret := 0
+
+	arr := strings.Split(input, "")
+	for _, element := range arr {
+		matches, err := regexp.MatchString(separator, element)
+		if err != nil {
+			return -1, err
+		}
+		if element == "'" && !doubleQuoteOpen {
+			singleQuoteOpen = !singleQuoteOpen
+			continue
+		} else if element == `"` && !singleQuoteOpen {
+			doubleQuoteOpen = !doubleQuoteOpen
+			continue
+		}
+
+		if !singleQuoteOpen && !doubleQuoteOpen && matches {
+			ret++
+		}
+	}
+	return ret, nil
+}

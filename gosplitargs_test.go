@@ -13,6 +13,22 @@ func TestSplitArgs(t *testing.T) {
 	testSpace(t, `I said 'I am sorry.', and he said "it doesn't matter."`)
 	testSemicolon(t, "SET @safe_uuid := UUID();INSERT INTO sys_user SET ID=@safe_uuid, CODE='1;2', EMAIL=?, PASSWORD=ENCRYPT(?, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16)));")
 	testEmpty(t, `,,,`)
+
+	count, err := CountSeparators(",,,", ",")
+	assert.Nil(t, err)
+	assert.Equal(t, 3, count)
+
+	count, err = CountSeparators("insert into table (a,b,c) values(?,?,?)", "\\?")
+	assert.Nil(t, err)
+	assert.Equal(t, 3, count)
+
+	count, err = CountSeparators("select * from table", "\\?")
+	assert.Nil(t, err)
+	assert.Equal(t, 0, count)
+
+	count, err = CountSeparators("select * from table where a='?' and b=?", "\\?")
+	assert.Nil(t, err)
+	assert.Equal(t, 1, count)
 }
 
 func testSpace(t *testing.T, i string) {

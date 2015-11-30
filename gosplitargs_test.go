@@ -12,7 +12,6 @@ func TestSplitArgs(t *testing.T) {
 	testSpace(t, `I said "I am sorry.", and he said "it doesn't matter."`)
 	testSpace(t, `I said 'I am sorry.', and he said "it doesn't matter."`)
 	testSemicolon(t, "SET @safe_uuid := UUID();INSERT INTO sys_user SET ID=@safe_uuid, CODE='1;2', EMAIL=?, PASSWORD=ENCRYPT(?, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16)));")
-	testEmpty(t, `,,,`)
 
 	count, err := CountSeparators(",,,", ",")
 	assert.Nil(t, err)
@@ -51,9 +50,30 @@ func testSemicolon(t *testing.T, i string) {
 	assert.Equal(t, "INSERT INTO sys_user SET ID=@safe_uuid, CODE='1;2', EMAIL=?, PASSWORD=ENCRYPT(?, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16)))", o[1])
 }
 
-func testEmpty(t *testing.T, i string) {
+func TestEmpty(t *testing.T) {
+	i := `,,,`
 	o, err := SplitArgs(i, ",", true)
 	assert.Nil(t, err)
 	assert.Equal(t, 4, len(o))
+}
 
+func TestEmpty2(t *testing.T) {
+	i := `,`
+	o, err := SplitArgs(i, ",", true)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(o))
+}
+
+func TestEmpty3(t *testing.T) {
+	i := ``
+	o, err := SplitArgs(i, "''", true)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(o))
+}
+
+func TestEmpty4(t *testing.T) {
+	i := ``
+	o, err := SplitArgs(i, ",", true)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(o))
 }

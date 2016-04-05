@@ -6,8 +6,9 @@ import (
 	"strings"
 )
 
-func SplitArgs(input, separator string, keepQuotes bool) ([]string, error) {
-	if separator == "" {
+func SplitArgs(input, sep string, keepQuotes bool) ([]string, error) {
+	separator := sep
+	if sep == "" {
 		separator = "\\s+"
 	}
 	singleQuoteOpen := false
@@ -38,7 +39,7 @@ func SplitArgs(input, separator string, keepQuotes bool) ([]string, error) {
 		if !singleQuoteOpen && !doubleQuoteOpen && matches {
 			if len(tokenBuffer) > 0 {
 				ret = append(ret, strings.Join(tokenBuffer, ""))
-			} else {
+			} else if sep != "" {
 				ret = append(ret, "")
 			}
 			tokenBuffer = make([]string, 0)

@@ -2,12 +2,13 @@
 package gosplitargs
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSplitArgs(t *testing.T) {
-	testSpace(t, "I said 'I am sorry.', and he said \"it doesn't matter.\"")
+	testSpace(t, "I  said 'I am sorry.', and he said \"it doesn't matter.\"")
 	testSpace(t, "I said \"I am sorry.\", and he said \"it doesn't matter.\"")
 	testSpace(t, `I said "I am sorry.", and he said "it doesn't matter."`)
 	testSpace(t, `I said 'I am sorry.', and he said "it doesn't matter."`)

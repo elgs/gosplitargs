@@ -39,17 +39,17 @@ func SplitArgs(input, sep string, keepQuotes bool) ([]string, error) {
 		if !singleQuoteOpen && !doubleQuoteOpen && matches {
 			if len(tokenBuffer) > 0 {
 				ret = append(ret, strings.Join(tokenBuffer, ""))
+				tokenBuffer = make([]string, 0)
 			} else if sep != "" {
-				ret = append(ret, "")
+				ret = append(ret, element)
 			}
-			tokenBuffer = make([]string, 0)
 		} else {
 			tokenBuffer = append(tokenBuffer, element)
 		}
 	}
 	if len(tokenBuffer) > 0 {
 		ret = append(ret, strings.Join(tokenBuffer, ""))
-	} else {
+	} else if sep != "" {
 		ret = append(ret, "")
 	}
 	return ret, nil

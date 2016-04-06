@@ -8,7 +8,7 @@ import (
 )
 
 func TestSplitArgs(t *testing.T) {
-	testSpace(t, "I  said 'I am sorry.', and he said \"it doesn't matter.\"")
+	testSpace(t, " I  said 'I am sorry.', and he said \"it doesn't matter.\" ")
 	testSpace(t, "I said \"I am sorry.\", and he said \"it doesn't matter.\"")
 	testSpace(t, `I said "I am sorry.", and he said "it doesn't matter."`)
 	testSpace(t, `I said 'I am sorry.', and he said "it doesn't matter."`)

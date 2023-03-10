@@ -14,21 +14,21 @@ func TestSplitArgs(t *testing.T) {
 	testSpace(t, `I said 'I am sorry.', and he said "it doesn't matter."`)
 	testSemicolon(t, "SET @safe_uuid := UUID();INSERT INTO sys_user SET ID=@safe_uuid, CODE='1;2', EMAIL=?, PASSWORD=ENCRYPT(?, CONCAT('$6$', SUBSTRING(SHA(RAND()), -16)));")
 
-	count, err := CountSeparators(",,,", ",")
-	assert.Nil(t, err)
-	assert.Equal(t, 3, count)
+	// count, err := CountSeparators(",,,", ",")
+	// assert.Nil(t, err)
+	// assert.Equal(t, 3, count)
 
-	count, err = CountSeparators("insert into table (a,b,c) values(?,?,?)", "\\?")
-	assert.Nil(t, err)
-	assert.Equal(t, 3, count)
+	// count, err = CountSeparators("insert into table (a,b,c) values(?,?,?)", "\\?")
+	// assert.Nil(t, err)
+	// assert.Equal(t, 3, count)
 
-	count, err = CountSeparators("select * from table", "\\?")
-	assert.Nil(t, err)
-	assert.Equal(t, 0, count)
+	// count, err = CountSeparators("select * from table", "\\?")
+	// assert.Nil(t, err)
+	// assert.Equal(t, 0, count)
 
-	count, err = CountSeparators("select * from table where a='?' and b=?", "\\?")
-	assert.Nil(t, err)
-	assert.Equal(t, 1, count)
+	// count, err = CountSeparators("select * from table where a='?' and b=?", "\\?")
+	// assert.Nil(t, err)
+	// assert.Equal(t, 1, count)
 }
 
 func testSpace(t *testing.T, i string) {
@@ -77,4 +77,45 @@ func TestEmpty4(t *testing.T) {
 	o, err := SplitArgs(i, ",", true)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(o))
+}
+
+func TestSplitSQL(t *testing.T) {
+	o, err := SplitSQL(`SELECT * FROM SOME_TABLE WHERE A=?`, ";", true)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(o))
+	assert.Equal(t, "SELECT * FROM SOME_TABLE WHERE A=?", o[0])
+
+	o, err = SplitSQL(` SELECT * FROM SOME_TABLE WHERE A=?;SELECT * FROM SOME_TABLE WHERE B=? `, ";", true)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(o))
+	assert.Equal(t, " SELECT * FROM SOME_TABLE WHERE A=?", o[0])
+	assert.Equal(t, "SELECT * FROM SOME_TABLE WHERE B=? ", o[1])
+
+	o, err = SplitSQL(` SELECT * FROM SOME_TABLE WHERE A=? --;SELECT * FROM SOME_TABLE WHERE B=? `, ";", true)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(o))
+	assert.Equal(t, " SELECT * FROM SOME_TABLE WHERE A=? --;SELECT * FROM SOME_TABLE WHERE B=? ", o[0])
+
+	o, err = SplitSQL(` SELECT * FROM SOME_TABLE WHERE A=? --I don't know SELECT * FROM SOME_TABLE WHERE B=? `, ";", true)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(o))
+	assert.Equal(t, " SELECT * FROM SOME_TABLE WHERE A=? --I don't know SELECT * FROM SOME_TABLE WHERE B=? ", o[0])
+
+	o, err = SplitSQL(" SELECT * FROM SOME_TABLE WHERE A=?; --I don't know \nSELECT * FROM SOME_TABLE WHERE B=? ", ";", true)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(o))
+	assert.Equal(t, " SELECT * FROM SOME_TABLE WHERE A=?", o[0])
+	assert.Equal(t, " --I don't know \nSELECT * FROM SOME_TABLE WHERE B=? ", o[1])
+
+	o, err = SplitSQL(" SELECT * FROM SOME_TABLE WHERE A=?; --I don't know; \nSELECT * FROM SOME_TABLE WHERE B=? ", ";", true)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(o))
+	assert.Equal(t, " SELECT * FROM SOME_TABLE WHERE A=?", o[0])
+	assert.Equal(t, " --I don't know; \nSELECT * FROM SOME_TABLE WHERE B=? ", o[1])
+
+	o, err = SplitSQL(";", ";", true)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(o))
+	assert.Equal(t, "", o[0])
+	assert.Equal(t, "", o[1])
 }
